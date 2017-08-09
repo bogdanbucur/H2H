@@ -1,6 +1,7 @@
 import os
 import unittest
 from time import sleep
+import lxml.etree as etree
 from random import randint
 
 from appium.webdriver import webelement
@@ -10,7 +11,6 @@ from appium import webdriver
 
 
 class H2H(unittest.TestCase):
-
     def setUp(self):
         capabilities = {
             'automationName' : 'Appium',
@@ -56,6 +56,8 @@ class H2H(unittest.TestCase):
 
     # Create a Product of type Refrigerator
     def test_002(self):
+        categoriesLen = 0
+
         sleep(2)
         self.driver.find_element_by_xpath('//android.widget.FrameLayout/android.widget.LinearLayout/android.support.v7.widget.RecyclerView/android.widget.LinearLayout').click()
         sleep(1)
@@ -65,40 +67,61 @@ class H2H(unittest.TestCase):
         # Add Product
         self.driver.find_elements_by_class_name('android.widget.ImageView')[0].click()
 
-        # Product Name
-        nameField = self.driver.find_elements_by_class_name('android.widget.EditText')[0]
-        nameField.click()
-        nameField.clear()
-        nameField.send_keys('Refrigerator type Product made in automated test')
-        self.driver.back()
-
-        # Serial Number
-        snField = self.driver.find_elements_by_class_name('android.widget.EditText')[1]
-        snField.click()
-        snField.clear()
-        snField.send_keys('11111')
-        self.driver.back()
-
-        # Label Code
-        labelField = self.driver.find_elements_by_class_name('android.widget.EditText')[2]
-        labelField.click()
-        labelField.clear()
-        labelField.send_keys('00001')
-        self.driver.back()
-
-        # Location
-        self.driver.find_elements_by_class_name('android.widget.Spinner')[0].click()
-        sleep(1)
-        self.driver.find_elements_by_class_name('android.widget.TextView')[0].click()
-
         # Category
-        self.driver.find_element_by_class_name('android.widget.Spinner')[1].click()
+        categorySpinner = self.driver.find_elements_by_class_name('android.widget.Spinner')[1]
+        categorySpinner.click()
         sleep(1)
-        self.driver.find_elements_by_class_name('android.widget.TextView')[0].click()
-        sleep(3)
 
-        print(self.driver.page_source)
+        categories = self.driver.page_source
 
+        with open('categories.xml', 'w') as f:
+            f.write(categories.replace('>', '>\n'))
+
+        with open('categories.xml', 'r') as g:
+            for item in g:
+                if 'class="android.widget.TextView"' in item:
+                    categoriesLen = categoriesLen + 1
+
+        for i in range(categoriesLen):
+            self.driver.find_elements_by_class_name('android.widget.TextView')[i].click()
+
+            currentView = self.driver.page_source
+
+            with open('currentView.xml', 'w') as a:
+                a.write(currentView.replace('>', '>\n'))
+
+                with open('currentView.xml', 'r') as b:
+                    for item in b:
+                        if 'class="android.widget.EditText"' in item:
+                            EditTextList = self.driver.find_elements_by_class_name('android.widget.EditText')
+                            for j in range(len(EditTextList)):
+                                textField = self.driver.find_elements_by_class_name('android.widget.EditText')[j]
+                                textField.click()
+                                textField.clear()
+                                textField.send_keys('Wrote something' + str(j))
+                                self.driver.back()
+
+                        elif 'class="android.widget.Spinner"' in item:
+                            SpinnerList = self.driver.find_elements_by_class_name('android.widget.Spinner')
+                            for j in range(len(SpinnerList) - 1):
+                                self.driver.find_elements_by_class_name('android.widget.Spinner')[j].click()
+
+                                spinnerView = self.driver.page_source
+
+                                with open('secondaryView.xml', 'w') as c:
+                                    c.write(spinnerView.replace('>', '>\n'))
+
+                                self.driver.find_elements_by_class_name('android.widget.TextView')[0].click()
+                        elif 'class="android.widget.CheckBox"' in item:
+                            checkboxList = self.driver.find_elements_by_class_name('android.widget.CheckBox')
+                            for l in range(len(checkboxList)):
+                                self.driver.find_elements_by_class_name('android.widget.CheckBox')[l].click()
+
+                        elif '' in item:
+
+
+                        else:
+                            self.driver.swipe(550, 1700, 550, 100)
 
     def tearDown(self):
         self.driver.quit()
