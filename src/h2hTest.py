@@ -80,48 +80,141 @@ class H2H(unittest.TestCase):
         with open('categories.xml', 'r') as g:
             for item in g:
                 if 'class="android.widget.TextView"' in item:
-                    categoriesLen = categoriesLen + 1
+                    categoriesLen += 1
+        self.driver.find_elements_by_class_name('android.widget.TextView')[0].click()
+        sleep(2)
 
         for i in range(categoriesLen):
-            self.driver.find_elements_by_class_name('android.widget.TextView')[i].click()
 
             currentView = self.driver.page_source
-
-            with open('currentView.xml', 'w') as a:
+            with open('currentView0.xml', 'w+') as a:
                 a.write(currentView.replace('>', '>\n'))
 
-                with open('currentView.xml', 'r') as b:
+            print('Run ' + str(i))
+            categorySpinner.click()
+            self.driver.find_elements_by_class_name('android.widget.TextView')[i].click()
+            sleep(2)
+
+            x = 0
+
+            while True:
+
+                with open('currentView' + str(x) + '.xml', 'r') as b:
+                    EditTextIndex = 0
+                    SpinnerIndex = 0
+                    LinearLayoutIndex = 0
+                    TextViewIndex = 0
+                    CheckBoxIndex = 0
                     for item in b:
-                        if 'class="android.widget.EditText"' in item:
-                            EditTextList = self.driver.find_elements_by_class_name('android.widget.EditText')
-                            for j in range(len(EditTextList)):
-                                textField = self.driver.find_elements_by_class_name('android.widget.EditText')[j]
+                        if 'xml version' in item:
+                            pass
+
+                        elif 'hierarchy rotation' in item:
+                            pass
+
+                        elif 'android.widget.FrameLayout' in item:
+                            pass
+
+                        elif 'android.widget.RelativeLayout' in item:
+                            pass
+
+                        elif 'android.widget.ImageView' in item:
+                            pass
+
+                        elif '</android.widget.ImageView>' in item:
+                            pass
+
+                        elif '</android.widget.LinearLayout>' in item:
+                            pass
+
+                        elif '</android.widget.ScrollView>' in item:
+                            pass
+
+                        elif '</android.widget.FrameLayout>' in item:
+                            pass
+
+                        elif '</android.widget.Spinner>' in item:
+                            pass
+
+                        elif '<android.view.View' in item:
+                            pass
+
+                        elif 'android.widget.LinearLayout' in item:
+                            if 'clickable="true"' in item:
+                                self.driver.find_elements_by_class_name('android.widget.LinearLayout')[LinearLayoutIndex].click()
+                                try:
+                                    if self.driver.find_element_by_id('android:id/button1').get_attribute('text') == 'Gallery':
+                                        self.driver.find_element_by_id('android:id/button1').click()
+                                        sleep(1)
+
+                                        self.driver.find_element_by_xpath('//android.widget.FrameLayout/android.widget.ScrollView/android.widget.ListView/android.widget.LinearLayout[1]').click()
+                                        sleep(1)
+                                        self.driver.find_element_by_id('android:id/button_once').click()
+                                        sleep(1)
+
+                                        positions = [(180, 300), (180, 300)]
+                                        self.driver.tap(positions, 100)
+                                        sleep(2)
+
+                                except:
+                                    pass
+                            else:
+                                LinearLayoutIndex += 1
+                            pass
+
+                        elif 'android.widget.TextView' in item:
+                            if 'text="Create"' in item:
+                                self.driver.find_elements_by_class_name('android.widget.TextView')[TextViewIndex].click()
+                                sleep(1)
+                            else:
+                                TextViewIndex += 1
+                            pass
+
+                        elif 'android.widget.ScrollView' in item:
+                            pass
+
+                        elif 'class="android.widget.EditText"' in item:
+                            if 'text="Buc"' in item:
+                                textField = self.driver.find_elements_by_class_name('android.widget.EditText')[EditTextIndex]
                                 textField.click()
                                 textField.clear()
-                                textField.send_keys('Wrote something' + str(j))
+                                textField.send_keys('1')
                                 self.driver.back()
+                            else:
+                                textField = self.driver.find_elements_by_class_name('android.widget.EditText')[EditTextIndex]
+                                textField.click()
+                                textField.clear()
+                                textField.send_keys('Wrote something')
+                                self.driver.back()
+                            EditTextIndex += 1
 
                         elif 'class="android.widget.Spinner"' in item:
-                            SpinnerList = self.driver.find_elements_by_class_name('android.widget.Spinner')
-                            for j in range(len(SpinnerList) - 1):
-                                self.driver.find_elements_by_class_name('android.widget.Spinner')[j].click()
+                            self.driver.find_elements_by_class_name('android.widget.Spinner')[SpinnerIndex].click()
+                            sleep(1)
 
-                                spinnerView = self.driver.page_source
+                            spinnerView = self.driver.page_source
 
-                                with open('secondaryView.xml', 'w') as c:
-                                    c.write(spinnerView.replace('>', '>\n'))
-
+                            if spinnerView == categories:
+                                pass
+                            else:
                                 self.driver.find_elements_by_class_name('android.widget.TextView')[0].click()
+
+                            SpinnerIndex += 1
+                            sleep(2)
+
                         elif 'class="android.widget.CheckBox"' in item:
-                            checkboxList = self.driver.find_elements_by_class_name('android.widget.CheckBox')
-                            for l in range(len(checkboxList)):
-                                self.driver.find_elements_by_class_name('android.widget.CheckBox')[l].click()
-
-                        elif '' in item:
-
+                            self.driver.find_elements_by_class_name('android.widget.CheckBox')[CheckBoxIndex].click()
+                            CheckBoxIndex += 1
+                            sleep(1)
 
                         else:
                             self.driver.swipe(550, 1700, 550, 100)
+                            currentView = self.driver.page_source
+                            with open('currentView' + str(i + 1) + '.xml', 'w+') as c:
+                                c.write(currentView.replace('>', '>\n'))
+                            sleep(2)
+
+                            x += 1
 
     def tearDown(self):
         self.driver.quit()
